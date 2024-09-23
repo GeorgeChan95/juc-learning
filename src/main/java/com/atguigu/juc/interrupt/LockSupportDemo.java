@@ -16,24 +16,31 @@ public class LockSupportDemo {
     static Lock lock = new ReentrantLock();
     static Condition condition = lock.newCondition();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Thread t1 = new Thread(() -> {
             System.out.println(Thread.currentThread().getName() + "\t" + "---come in");
+            System.out.println(Thread.currentThread().getName() + "\t" + "--- park1");
             LockSupport.park();
+            System.out.println(Thread.currentThread().getName() + "\t" + "--- park2");
             LockSupport.park();
             System.out.println(Thread.currentThread().getName() + "\t" + "---被唤醒");
         }, "t1");
         t1.start();
 
+//        TimeUnit.MICROSECONDS.sleep(500);
+
         new Thread(() -> {
             LockSupport.unpark(t1);
+            LockSupport.unpark(t1);
+            System.out.println(Thread.currentThread().getName() + "\t" + "--- unpark1");
+            System.out.println(Thread.currentThread().getName() + "\t" + "--- unpark2");
             try {
                 TimeUnit.SECONDS.sleep(3);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            LockSupport.unpark(t1);
-            System.out.println(Thread.currentThread().getName() + "\t" + "---发出通知");
+//            LockSupport.unpark(t1);
+//            System.out.println(Thread.currentThread().getName() + "\t" + "---发出通知");
         }, "t2").start();
     }
 
