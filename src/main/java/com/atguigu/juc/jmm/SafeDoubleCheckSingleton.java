@@ -4,18 +4,22 @@ package com.atguigu.juc.jmm;
  * @auther zzyy
  * @create 2021-03-17 15:00
  */
-public class SafeDoubleCheckSingleton
-{
+public class SafeDoubleCheckSingleton {
+    // 加 volatile 保证了对象的可见性，实现线程安全的延迟初始化。
     private volatile static SafeDoubleCheckSingleton singleton = null;
+    // 不加 volatile 在多线程环境下可能导致获取到的对象是null
+//    private static SafeDoubleCheckSingleton singleton = null;
+
     //私有化构造方法
-    private SafeDoubleCheckSingleton(){ }
+    private SafeDoubleCheckSingleton() {
+    }
 
     //双重锁设计
-    public static SafeDoubleCheckSingleton getInstance(){
-        if (singleton == null){
+    public static SafeDoubleCheckSingleton getInstance() {
+        if (singleton == null) {
             //1.多线程并发创建对象时，会通过加锁保证只有一个线程能创建对象
-            synchronized (SafeDoubleCheckSingleton.class){
-                if (singleton == null){
+            synchronized (SafeDoubleCheckSingleton.class) {
+                if (singleton == null) {
                     //隐患：多线程环境下，由于重排序，该对象可能还未完成初始化就被其他线程读取
                     singleton = new SafeDoubleCheckSingleton();
                 }
@@ -25,9 +29,7 @@ public class SafeDoubleCheckSingleton
         return singleton;
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         SafeDoubleCheckSingleton instance = SafeDoubleCheckSingleton.getInstance();
-
     }
 }
