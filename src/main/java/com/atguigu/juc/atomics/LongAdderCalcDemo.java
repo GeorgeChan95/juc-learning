@@ -7,36 +7,50 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
-class ClickNumber
-{
+class ClickNumber {
     int number = 0;
-    public synchronized void add_Synchronized()
-    {
+
+    /**
+     * 对比1：使用 synchronized
+     */
+    public synchronized void add_Synchronized() {
         number++;
     }
 
     AtomicInteger atomicInteger = new AtomicInteger();
-    public void add_AtomicInteger()
-    {
+
+    /**
+     * 对比2: AtomicInteger
+     */
+    public void add_AtomicInteger() {
         atomicInteger.incrementAndGet();
     }
 
     AtomicLong atomicLong = new AtomicLong();
-    public void add_AtomicLong()
-    {
+
+    /**
+     * 对比3：AtomicLong
+     */
+    public void add_AtomicLong() {
         atomicLong.incrementAndGet();
     }
 
     LongAdder longAdder = new LongAdder();
-    public void add_LongAdder()
-    {
+
+    /**
+     * 对比4：LongAdder
+     */
+    public void add_LongAdder() {
         longAdder.increment();
         //longAdder.sum();
     }
 
-    LongAccumulator longAccumulator = new LongAccumulator((x,y) -> x+y,0);
-    public void add_LongAccumulator()
-    {
+    LongAccumulator longAccumulator = new LongAccumulator((x, y) -> x + y, 0);
+
+    /**
+     * 对比5：LongAccumulator
+     */
+    public void add_LongAccumulator() {
         longAccumulator.accumulate(1);
     }
 
@@ -46,16 +60,14 @@ class ClickNumber
 /**
  * @auther zzyy
  * @create 2021-03-19 16:08
- *
- *  50个线程，每个线程100W次，总点赞数出来
+ * <p>
+ * 50个线程，每个线程100W次，总点赞数出来
  */
-public class LongAdderCalcDemo
-{
+public class LongAdderCalcDemo {
     public static final int SIZE_THREAD = 50;
     public static final int _1W = 10000;
 
-    public static void main(String[] args) throws InterruptedException
-    {
+    public static void main(String[] args) throws InterruptedException {
         ClickNumber clickNumber = new ClickNumber();
         long startTime;
         long endTime;
@@ -67,100 +79,101 @@ public class LongAdderCalcDemo
         CountDownLatch countDownLatch5 = new CountDownLatch(SIZE_THREAD);
         //========================
 
+        /****************** synchronized *******************/
         startTime = System.currentTimeMillis();
-        for (int i = 1; i <=SIZE_THREAD; i++) {
+        for (int i = 1; i <= SIZE_THREAD; i++) {
             new Thread(() -> {
-                try
-                {
-                    for (int j = 1; j <=100 * _1W; j++) {
+                try {
+                    for (int j = 1; j <= 100 * _1W; j++) {
                         clickNumber.add_Synchronized();
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                }finally {
+                } finally {
                     countDownLatch1.countDown();
                 }
-            },String.valueOf(i)).start();
+            }, String.valueOf(i)).start();
         }
         countDownLatch1.await();
         endTime = System.currentTimeMillis();
-        System.out.println("----costTime: "+(endTime - startTime) +" 毫秒"+"\t add_Synchronized"+"\t"+clickNumber.number);
+        System.out.println("----costTime: " + (endTime - startTime) + " 毫秒" + "\t add_Synchronized" + "\t" + clickNumber.number);
 
 
+        /****************** AtomicInteger *******************/
         startTime = System.currentTimeMillis();
-        for (int i = 1; i <=SIZE_THREAD; i++) {
+        for (int i = 1; i <= SIZE_THREAD; i++) {
             new Thread(() -> {
-                try
-                {
-                    for (int j = 1; j <=100 * _1W; j++) {
+                try {
+                    for (int j = 1; j <= 100 * _1W; j++) {
                         clickNumber.add_AtomicInteger();
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                }finally {
+                } finally {
                     countDownLatch2.countDown();
                 }
-            },String.valueOf(i)).start();
+            }, String.valueOf(i)).start();
         }
         countDownLatch2.await();
         endTime = System.currentTimeMillis();
-        System.out.println("----costTime: "+(endTime - startTime) +" 毫秒"+"\t add_AtomicInteger"+"\t"+clickNumber.atomicInteger.get());
+        System.out.println("----costTime: " + (endTime - startTime) + " 毫秒" + "\t add_AtomicInteger" + "\t" + clickNumber.atomicInteger.get());
 
+        /****************** AtomicLong *******************/
         startTime = System.currentTimeMillis();
-        for (int i = 1; i <=SIZE_THREAD; i++) {
+        for (int i = 1; i <= SIZE_THREAD; i++) {
             new Thread(() -> {
-                try
-                {
-                    for (int j = 1; j <=100 * _1W; j++) {
+                try {
+                    for (int j = 1; j <= 100 * _1W; j++) {
                         clickNumber.add_AtomicLong();
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                }finally {
+                } finally {
                     countDownLatch3.countDown();
                 }
-            },String.valueOf(i)).start();
+            }, String.valueOf(i)).start();
         }
         countDownLatch3.await();
         endTime = System.currentTimeMillis();
-        System.out.println("----costTime: "+(endTime - startTime) +" 毫秒"+"\t add_AtomicLong"+"\t"+clickNumber.atomicLong.get());
+        System.out.println("----costTime: " + (endTime - startTime) + " 毫秒" + "\t add_AtomicLong" + "\t" + clickNumber.atomicLong.get());
 
+        /****************** LongAdder *******************/
         startTime = System.currentTimeMillis();
-        for (int i = 1; i <=SIZE_THREAD; i++) {
+        for (int i = 1; i <= SIZE_THREAD; i++) {
             new Thread(() -> {
-                try
-                {
-                    for (int j = 1; j <=100 * _1W; j++) {
+                try {
+                    for (int j = 1; j <= 100 * _1W; j++) {
                         clickNumber.add_LongAdder();
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                }finally {
+                } finally {
                     countDownLatch4.countDown();
                 }
-            },String.valueOf(i)).start();
+            }, String.valueOf(i)).start();
         }
         countDownLatch4.await();
         endTime = System.currentTimeMillis();
-        System.out.println("----costTime: "+(endTime - startTime) +" 毫秒"+"\t add_LongAdder"+"\t"+clickNumber.longAdder.longValue());
+        System.out.println("----costTime: " + (endTime - startTime) + " 毫秒" + "\t add_LongAdder" + "\t" + clickNumber.longAdder.longValue());
 
+
+        /****************** LongAccumulator *******************/
         startTime = System.currentTimeMillis();
-        for (int i = 1; i <=SIZE_THREAD; i++) {
+        for (int i = 1; i <= SIZE_THREAD; i++) {
             new Thread(() -> {
-                try
-                {
-                    for (int j = 1; j <=100 * _1W; j++) {
+                try {
+                    for (int j = 1; j <= 100 * _1W; j++) {
                         clickNumber.add_LongAccumulator();
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
-                }finally {
+                } finally {
                     countDownLatch5.countDown();
                 }
-            },String.valueOf(i)).start();
+            }, String.valueOf(i)).start();
         }
         countDownLatch5.await();
         endTime = System.currentTimeMillis();
-        System.out.println("----costTime: "+(endTime - startTime) +" 毫秒"+"\t add_LongAccumulator"+"\t"+clickNumber.longAccumulator.longValue());
+        System.out.println("----costTime: " + (endTime - startTime) + " 毫秒" + "\t add_LongAccumulator" + "\t" + clickNumber.longAccumulator.longValue());
     }
 }
